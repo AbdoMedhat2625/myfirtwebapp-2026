@@ -11,7 +11,7 @@ import { lastValueFrom } from 'rxjs';
 export class App implements OnInit {
   
   private http = inject(HttpClient);
-  protected readonly title = signal('Chatting');
+  protected readonly title = signal('MateFinder');
   protected members = signal<any>([])
 
 
