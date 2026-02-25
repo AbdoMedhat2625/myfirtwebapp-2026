@@ -1,2 +1,22 @@
 <app-nav></app-nav>
-<app-home ></app-home>
+
+@if (router.url === '/') {
+  <router-outlet></router-outlet>
+} @else {
+  <div class="container mt-24">
+    <router-outlet></router-outlet>
+  </div>
+}
+
+<!-- <app-nav></app-nav>
+
+<div [class.mt-24]="router.url !== '/'"
+     [class.container]="router.url !== '/'"
+     [class.mt-auto]="router.url !== '/'">
+  <router-outlet></router-outlet>
+</div> -->
+
+<!-- <app-nav></app-nav>
+<div class="container mt-24">
+  <router-outlet></router-outlet>
+</div> -->
