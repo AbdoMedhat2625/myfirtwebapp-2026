@@ -19,6 +19,7 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 });
 builder.Services.AddCors();
 builder.Services.AddScoped<ITokenServices,TokenService>();
+builder.Services.AddScoped<IMemberRepository,MemberRepository>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
  .AddJwtBearer(options =>
  {
@@ -44,5 +45,20 @@ app.UseAuthorization();
 
 // middleware 
 app.MapControllers();
+
+using var scope=app.Services.CreateScope();
+var services=scope.ServiceProvider;
+try
+{
+   var context=services.GetRequiredService<AppDbContext>();//ascces to database
+   await context.Database.MigrateAsync();//create db if not exissts
+   await Seed.SeedUsers(context);
+}
+catch (Exception ex)
+{
+   var logger=services.GetRequiredService<ILogger<Program>>();
+   logger.LogError(ex,"An error occured during migration");
+   throw;
+}
 
 app.Run();
