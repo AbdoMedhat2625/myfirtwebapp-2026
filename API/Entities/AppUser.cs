@@ -14,4 +14,6 @@ public class AppUser  //auth
 
    // NAV prop
    public Member Member { get; set; } = null!;
+
+   
 }
