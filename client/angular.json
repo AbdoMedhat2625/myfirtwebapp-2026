@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "client": {
+    "MateFinderApp": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -93,10 +93,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "client:build:production"
+              "buildTarget": "MateFinderApp:build:production"
             },
             "development": {
-              "buildTarget": "client:build:development"
+              "buildTarget": "MateFinderApp:build:development"
             }
           },
           "defaultConfiguration": "development"
