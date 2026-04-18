@@ -1,20 +1,79 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { MemberService } from '../../../core/services/member-service';
-import { Observable } from 'rxjs';
-import { AsyncPipe } from '@angular/common';
-import { Member } from '../../../Types/member';
+import { Member, MemberParams } from '../../../Types/member';
 import { MemberCard } from "../member-card/member-card";
+import { PaginatedResult } from '../../../Types/pagination';
+import { Paginator } from "../../../shared/paginator/paginator";
+import { FilterModel } from '../filter-model/filter-model';
 
 @Component({
   selector: 'app-member-list',
-  imports: [AsyncPipe, MemberCard],
+  imports: [MemberCard, Paginator, FilterModel],
   templateUrl: './member-list.html',
   styleUrl: './member-list.css',
 })
-export class MemberList {
+export class MemberList implements OnInit {
+@ViewChild('filterModel') model!: FilterModel;
 private memberService=inject(MemberService);
-protected members$ : Observable<Member[]>;
+protected paginatedMembers=signal<PaginatedResult<Member>| null>(null);
+protected memberParams= new MemberParams();
+private updatedParams = new MemberParams();
+
 constructor(){
-  this.members$= this.memberService.getMembers();
+  const filters=localStorage.getItem('filters');
+  if(filters){
+    this.memberParams = JSON.parse(filters);
+    this.updatedParams=JSON.parse(filters);
+  }
+}
+
+  ngOnInit(): void {
+    this.loadMembers()
+  }
+loadMembers(){
+ this.memberService.getMembers(this.memberParams).subscribe({
+  next:result=>{
+    this.paginatedMembers.set(result)
+  }
+ })
+}
+onPageChange(event:{pageNumber:number,pageSize:number}){
+this.memberParams.pageSize=event.pageSize;
+this.memberParams.pageNumber=event.pageNumber;
+this.loadMembers();
+}
+openModel(){
+   this.model.memberParams.set({...this.memberParams});
+  this.model.open();
+}
+onClose(){
+  console.log('Model closed')
+}
+onFilterChange(data:MemberParams){
+  this.memberParams = {...data};
+  this.updatedParams={...data};
+  this.loadMembers();
+}
+resetFilters(){
+  this.memberParams= new MemberParams();
+  this.updatedParams= new MemberParams();
+  this.loadMembers();
+}
+get displayMessage(): string{
+  const defaultParams= new MemberParams();
+  const filters:string[]=[];
+  if(this.updatedParams.gender){
+    filters.push(this.updatedParams.gender+"s")
+  }else{
+    filters.push('Males,Females');
+  }
+
+  if(this.updatedParams.minAge!== defaultParams.minAge|| 
+    this.updatedParams.maxAge !==defaultParams.maxAge){
+        filters.push(` ages ${this.updatedParams.minAge}-${this.updatedParams.maxAge}`)
+  }
+  filters.push(this.updatedParams.OrderBy=='lastActive'?
+    'Recently active':'Newest members');
+    return filters.length>0 ?`Selected: ${filters.join('  | ')}` : 'All members'
 }
 }

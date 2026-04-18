@@ -8,6 +8,7 @@ using API.Interfaces;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http.HttpResults;
 using API.Extensions;
+using API.Helpers;
 namespace API.Controllers
 {
     [Authorize]
@@ -15,9 +16,10 @@ namespace API.Controllers
     IPhotoService photoService) : BaseApiController
     {
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<Member>>> GetMembers()
+        public async Task<ActionResult<IReadOnlyList<Member>>> GetMembers([FromQuery]MemberParams memberParams)
         {
-            return Ok( await memberRepository.GetMembersAsync());
+            memberParams.CurrentMemberId=User.GetMemberId();
+            return Ok( await memberRepository.GetMembersAsync(memberParams));
         }
         
         [HttpGet("{id}")]
